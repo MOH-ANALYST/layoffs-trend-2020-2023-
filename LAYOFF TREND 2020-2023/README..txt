@@ -25,11 +25,18 @@ Key insights include which **companies, countries, and industries** were most af
 - **Excel** – Data storage and initial review    
 
 ## SQL Queries  
-Example query to get **top 3 companies with highest layoffs**:  
+Example query to get **top 5 companies with highest layoffs**:  
 
-```sql
-SELECT company, SUM(total_laid_off) AS total_layoffs
-FROM layoffs_data
-GROUP BY company
-ORDER BY total_layoffs DESC
-LIMIT 3;
+select *
+from
+(select company,
+ year(`date`) as `year`
+ ,sum(total_laid_off) as total_layoffs,
+dense_rank()over(partition by year(`date`) order by sum(total_laid_off) desc) as `rank`
+from layoffs_sample2 
+WHERE TOTAL_LAID_OFF IS NOT NULL
+AND `DATE` IS NOT NULL
+group by company,year(`DATE`)) as company_year_ranking
+where `rank` <= 5
+order by `rank` asc
+ ;
